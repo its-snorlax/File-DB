@@ -1,6 +1,7 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class FileOperation {
     private final File file;
@@ -13,5 +14,14 @@ public class FileOperation {
         FileWriter fw = new FileWriter(file, true);
         fw.write(jsonData);
         fw.close();
+    }
+
+    public String read() throws IOException {
+        StringBuilder content = new StringBuilder();
+        FileReader fileReader = new FileReader(file);
+        int contentChar;
+        while ((contentChar = fileReader.read()) != -1) content.append((char) contentChar);
+        fileReader.close();
+        return content.toString();
     }
 }

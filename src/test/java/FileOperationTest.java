@@ -31,4 +31,16 @@ public class FileOperationTest {
 
         assertEquals(fileInput, actualString);
     }
+
+    @Test
+    public void shouldAbleToReadFromFile() throws IOException {
+        File file = new File("./testFile.txt");
+        FileOperation fileOperation = new FileOperation(file);
+        String input = "abcd efegh";
+        fileOperation.write(input);
+
+        String actualOutput = fileOperation.read();
+
+        assertEquals(input, actualOutput);
+    }
 }
