@@ -13,6 +13,7 @@ public class FileOperation {
     public void write(String jsonData) throws IOException {
         FileWriter fw = new FileWriter(file, true);
         fw.write(jsonData);
+        fw.append("\n");
         fw.close();
     }
 

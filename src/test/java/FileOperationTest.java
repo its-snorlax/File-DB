@@ -39,7 +39,7 @@ public class FileOperationTest {
         String input = "abcd efegh";
         fileOperation.write(input);
 
-        String actualOutput = fileOperation.read();
+        String actualOutput = fileOperation.read().replaceAll("\n","");
 
         assertEquals(input, actualOutput);
     }
