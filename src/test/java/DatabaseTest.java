@@ -23,7 +23,6 @@ public class DatabaseTest {
                 .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}"));
     }
 
-
     @Test
     public void shouldInsertJsonCorrespondingToKeyWhenFilePathIsGiven() throws IOException {
         assertTrue(new Database("/home/prayas/File-DB")
