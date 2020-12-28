@@ -10,8 +10,9 @@ public class Database {
     private String path = null;
 
 
-    public Database() {
+    public Database() throws IOException {
         this.databaseRegistry = new File(DATABASE_FILE_NAME);
+        databaseRegistry.createNewFile();
     }
 
     public Database(String path) throws IOException {
@@ -31,6 +32,14 @@ public class Database {
         fileManager.write(resourceFile, "{\"" + key + "\" : " + json + "}", false);
         String read = fileManager.read(resourceFile);
         return new ObjectMapper().readTree(read).get(key) != null;
+    }
+
+    public String read(String key) throws IOException {
+        FileManager fileManager = new FileManager();
+        String read;
+        if (path == null) read = fileManager.read(new File(key + ".txt"));
+        else read = fileManager.read(new File(path + key + ".txt"));
+        return new ObjectMapper().readTree(read).get(key).toString();
     }
 
     private File createResourceFile(String resourceFileName) throws IOException {

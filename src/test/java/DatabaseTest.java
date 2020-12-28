@@ -4,6 +4,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class DatabaseTest {
@@ -31,5 +32,23 @@ public class DatabaseTest {
         assertTrue(new Database("/home/prayas/File-DB")
                 .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}"));
 
+    }
+
+    @Test
+    public void shouldReadTheExactDataWhichWeStoreInFile() throws IOException {
+        Database database = new Database();
+        String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
+        database.create("key3", data);
+
+        assertEquals(data, database.read("key3"));
+    }
+
+    @Test
+    public void shouldReadTheExactDataWhichWeStoreInFileWhenFilePathIsGiven() throws IOException {
+        Database database = new Database("/home/prayas/File-DB");
+        String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
+        database.create("key3", data);
+
+        assertEquals(data, database.read("key3"));
     }
 }
