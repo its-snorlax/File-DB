@@ -5,9 +5,9 @@ import java.io.IOException;
 
 public class FileManager {
 
-    public void write(File file, String jsonData) throws IOException {
-        FileWriter fw = new FileWriter(file, true);
-        fw.write(jsonData);
+    public void write(File file, String data, boolean append) throws IOException {
+        FileWriter fw = new FileWriter(file, append);
+        fw.write(data);
         fw.append("\n");
         fw.close();
     }

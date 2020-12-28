@@ -15,16 +15,14 @@ public class FileManagerTest {
     @Before
     public void createFile() throws IOException {
         file = new File("./testFile.txt");
-        if (file.exists()) file.delete();
-
-        new File("./testFile.txt").createNewFile();
+        file.createNewFile();
     }
 
     @Test
     public void shouldAbleToWriteInFile() throws IOException {
         FileManager fileManager = new FileManager();
         String fileInput = "abcdefegh";
-        fileManager.write(file,fileInput);
+        fileManager.write(file, fileInput, false);
 
         String actualString = new BufferedReader(new FileReader(file)).readLine();
         assertEquals(fileInput, actualString);
@@ -35,9 +33,9 @@ public class FileManagerTest {
         File file = new File("./testFile.txt");
         FileManager fileManager = new FileManager();
         String input = "abcd efegh";
-        fileManager.write(file, input);
+        fileManager.write(file, input, false);
 
-        String actualOutput = fileManager.read(file).replaceAll("\n","");
+        String actualOutput = fileManager.read(file).replaceAll("\n", "");
 
         assertEquals(input, actualOutput);
     }
