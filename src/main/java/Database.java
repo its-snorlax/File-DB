@@ -1,6 +1,5 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +13,10 @@ public class Database {
     }
 
     public boolean create(String key, String json) throws IOException {
-        FileOperation fileOperation = new FileOperation(file);
-        fileOperation.write("{\"" + key + "\" : " + json + "}");
+        FileManager fileManager = new FileManager();
+        fileManager.write(file, "{\"" + key + "\" : " + json + "}");
 
-        String read = fileOperation.read();
+        String read = fileManager.read(file);
         String[] split = read.split("\n");
 
         JsonNode forInputKey = null;

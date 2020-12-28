@@ -8,11 +8,13 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class FileOperationTest {
+public class FileManagerTest {
+
+    private File file;
 
     @Before
     public void createFile() throws IOException {
-        File file = new File("./testFile.txt");
+        file = new File("./testFile.txt");
         if (file.exists()) file.delete();
 
         new File("./testFile.txt").createNewFile();
@@ -20,26 +22,22 @@ public class FileOperationTest {
 
     @Test
     public void shouldAbleToWriteInFile() throws IOException {
-        File file = new File("./testFile.txt");
-        FileOperation fileOperation = new FileOperation(file);
-
-
+        FileManager fileManager = new FileManager();
         String fileInput = "abcdefegh";
-        fileOperation.write(fileInput);
+        fileManager.write(file,fileInput);
 
         String actualString = new BufferedReader(new FileReader(file)).readLine();
-
         assertEquals(fileInput, actualString);
     }
 
     @Test
     public void shouldAbleToReadFromFile() throws IOException {
         File file = new File("./testFile.txt");
-        FileOperation fileOperation = new FileOperation(file);
+        FileManager fileManager = new FileManager();
         String input = "abcd efegh";
-        fileOperation.write(input);
+        fileManager.write(file, input);
 
-        String actualOutput = fileOperation.read().replaceAll("\n","");
+        String actualOutput = fileManager.read(file).replaceAll("\n","");
 
         assertEquals(input, actualOutput);
     }
