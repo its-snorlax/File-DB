@@ -1,4 +1,4 @@
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
@@ -9,10 +9,17 @@ import static org.junit.Assert.assertTrue;
 
 public class DatabaseTest {
 
-    @Before
-    public void createFile() throws IOException {
-        File file = new File("./Database.txt");
-        if (file.exists()) file.delete();
+    @After
+    public void createFile() {
+        File dbFile = new File("./Database.txt");
+        File key1File = new File("./key1.txt");
+        File key2File = new File("./key2.txt");
+        File key3File = new File("./key3.txt");
+
+        if (dbFile.exists()) dbFile.delete();
+        if (key1File.exists()) dbFile.delete();
+        if (key2File.exists()) dbFile.delete();
+        if (key3File.exists()) dbFile.delete();
     }
 
     @Test
