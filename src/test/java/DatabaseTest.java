@@ -17,9 +17,9 @@ public class DatabaseTest {
         File key3File = new File("./key3.txt");
 
         if (dbFile.exists()) dbFile.delete();
-        if (key1File.exists()) dbFile.delete();
-        if (key2File.exists()) dbFile.delete();
-        if (key3File.exists()) dbFile.delete();
+        if (key1File.exists()) key1File.delete();
+        if (key2File.exists()) key2File.delete();
+        if (key3File.exists()) key3File.delete();
     }
 
     @Test
