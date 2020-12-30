@@ -1,10 +1,15 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
-import exception.ExceptionMessage;
 import exception.KeyAlreadyExistsException;
 import exception.KeyNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static exception.ExceptionMessage.KEY_ALREADY_EXIST_EXCEPTION;
+import static exception.ExceptionMessage.KEY_NOT_FOUND_EXCEPTION;
 
 public class Database {
 
@@ -28,7 +33,7 @@ public class Database {
 
     public boolean create(String key, String json) throws Exception {
         if (searchFor(key))
-            throw new KeyAlreadyExistsException(ExceptionMessage.KEY_ALREADY_EXIST_EXCEPTION);
+            throw new KeyAlreadyExistsException(KEY_ALREADY_EXIST_EXCEPTION);
 
         FileManager fileManager = new FileManager();
         String resourceFileName = key + ".txt";
@@ -41,12 +46,29 @@ public class Database {
     }
 
     public String read(String key) throws Exception {
-        if (!searchFor(key)) throw new KeyNotFoundException(ExceptionMessage.KEY_NOT_FOUND_EXCEPTION);
+        if (!searchFor(key)) throw new KeyNotFoundException(KEY_NOT_FOUND_EXCEPTION);
         FileManager fileManager = new FileManager();
         String read;
         if (path == null) read = fileManager.read(new File(key + ".txt"));
         else read = fileManager.read(new File(path + key + ".txt"));
         return new ObjectMapper().readTree(read).get(key).toString();
+    }
+
+    public void delete(String key) throws Exception {
+        if (!searchFor(key)) throw new KeyNotFoundException(KEY_NOT_FOUND_EXCEPTION);
+
+        FileManager fileManager = new FileManager();
+        String read = fileManager.read(databaseRegistry);
+
+        String[] entries = read.split("(?<=\n)");
+        Optional<String> reduce = Arrays.stream(entries).filter(s -> {
+            String[] split = s.split(":");
+            return !split[0].equals(key);
+        }).collect(Collectors.toList()).stream().reduce((s, s2) -> s + s2);
+
+        if (path == null) new File(key + ".txt").delete();
+        else new File(path + key + ".txt").delete();
+        if (reduce.isPresent()) fileManager.write(databaseRegistry, reduce.get(), false);
     }
 
     private File createResourceFile(String resourceFileName) throws IOException {

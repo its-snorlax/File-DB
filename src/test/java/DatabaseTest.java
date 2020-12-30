@@ -5,8 +5,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DatabaseTest {
 
@@ -73,5 +72,30 @@ public class DatabaseTest {
     public void shouldRaiseKeyNotFoundExceptionWhenYouTryToGetAKeyWhichIsNeverInserted() throws Exception {
         Database database = new Database();
         database.read("key1");
+    }
+
+    @Test(expected = KeyNotFoundException.class)
+    public void shouldRaiseKeyNotFoundExceptionOnceTheKeyIsDeleted() throws Exception {
+        Database database = new Database();
+        String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
+        String key = "key4";
+        database.create("key1", data);
+        database.create("key2", data);
+        database.create(key, data);
+        database.delete(key);
+        database.read(key);
+        assertFalse(new File(key + ".text").exists());
+    }
+
+    @Test(expected = KeyNotFoundException.class)
+    public void shouldRaiseKeyNotFoundExceptionOnceTheKeyIsDeletedWhenDBPathIsGiven() throws Exception {
+        String path = "/home/prayas/File-DB";
+        Database database = new Database(path);
+        String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
+        String key = "key4";
+        database.create(key, data);
+        database.delete(key);
+        database.read(key);
+        assertFalse(new File(path + key + ".text").exists());
     }
 }
