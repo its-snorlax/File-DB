@@ -1,9 +1,9 @@
 import exception.KeyAlreadyExistsException;
+import exception.KeyNotFoundException;
 import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +24,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void shouldInsertJsonCorrespondingToKeyInFile() throws IOException, KeyAlreadyExistsException {
+    public void shouldInsertJsonCorrespondingToKeyInFile() throws Exception {
         assertTrue(new Database()
                 .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}"));
 
@@ -33,7 +33,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void shouldInsertJsonCorrespondingToKeyWhenFilePathIsGiven() throws IOException, KeyAlreadyExistsException {
+    public void shouldInsertJsonCorrespondingToKeyWhenFilePathIsGiven() throws Exception {
         assertTrue(new Database("/home/prayas/File-DB")
                 .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}"));
 
@@ -43,7 +43,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void shouldReadTheExactDataWhichWeStoreInFile() throws IOException, KeyAlreadyExistsException {
+    public void shouldReadTheExactDataWhichWeStoreInFile() throws Exception {
         Database database = new Database();
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
         database.create("key3", data);
@@ -52,7 +52,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void shouldReadTheExactDataWhichWeStoreInFileWhenFilePathIsGiven() throws IOException, KeyAlreadyExistsException {
+    public void shouldReadTheExactDataWhichWeStoreInFileWhenFilePathIsGiven() throws Exception {
         Database database = new Database("/home/prayas/File-DB");
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
         database.create("key3", data);
@@ -61,11 +61,17 @@ public class DatabaseTest {
     }
 
 
-    @Test (expected = KeyAlreadyExistsException.class)
-    public void shouldRaiseKeyAlreadyExistExceptionIfKeyIsAlreadyExist() throws IOException, KeyAlreadyExistsException {
+    @Test(expected = KeyAlreadyExistsException.class)
+    public void shouldRaiseKeyAlreadyExistExceptionIfKeyIsAlreadyExist() throws Exception {
         Database database = new Database();
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
         database.create("key3", data);
         database.create("key3", data);
+    }
+
+    @Test(expected = KeyNotFoundException.class)
+    public void shouldRaiseKeyNotFoundExceptionWhenYouTryToGetAKeyWhichIsNeverInserted() throws Exception {
+        Database database = new Database();
+        database.read("key1");
     }
 }

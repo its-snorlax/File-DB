@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exception.ExceptionMessage;
 import exception.KeyAlreadyExistsException;
+import exception.KeyNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class Database {
         databaseRegistry.createNewFile();
     }
 
-    public boolean create(String key, String json) throws IOException, KeyAlreadyExistsException {
+    public boolean create(String key, String json) throws Exception {
         if (searchFor(key))
             throw new KeyAlreadyExistsException(ExceptionMessage.KEY_ALREADY_EXIST_EXCEPTION);
 
@@ -39,7 +40,8 @@ public class Database {
         return new ObjectMapper().readTree(read).get(key) != null;
     }
 
-    public String read(String key) throws IOException {
+    public String read(String key) throws Exception {
+        if (!searchFor(key)) throw new KeyNotFoundException(ExceptionMessage.KEY_NOT_FOUND_EXCEPTION);
         FileManager fileManager = new FileManager();
         String read;
         if (path == null) read = fileManager.read(new File(key + ".txt"));
