@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -39,20 +40,20 @@ public class DatabaseTest {
     @Test
     public void shouldInsertJsonCorrespondingToKeyInFile() throws Exception {
         assertTrue(new Database()
-                .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}"));
+                .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}", 60));
 
         assertTrue(new Database()
-                .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}"));
+                .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}", 60));
     }
 
     @Test
     public void shouldInsertJsonCorrespondingToKeyWhenFilePathIsGiven() throws Exception {
 
         assertTrue(new Database(homePath + "/File-DB")
-                .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}"));
+                .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}", 60));
 
         assertTrue(new Database(homePath + "/File-DB")
-                .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}"));
+                .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}", 60));
 
     }
 
@@ -60,7 +61,7 @@ public class DatabaseTest {
     public void shouldReadTheExactDataWhichWeStoreInFile() throws Exception {
         Database database = new Database();
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
-        database.create("key3", data);
+        database.create("key3", data, 60);
 
         assertEquals(data, database.read("key3"));
     }
@@ -69,7 +70,7 @@ public class DatabaseTest {
     public void shouldReadTheExactDataWhichWeStoreInFileWhenFilePathIsGiven() throws Exception {
         Database database = new Database(homePath + "/File-DB");
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
-        database.create("key3", data);
+        database.create("key3", data, 60);
 
         assertEquals(data, database.read("key3"));
     }
@@ -79,8 +80,8 @@ public class DatabaseTest {
     public void shouldRaiseKeyAlreadyExistExceptionIfKeyIsAlreadyExist() throws Exception {
         Database database = new Database();
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
-        database.create("key3", data);
-        database.create("key3", data);
+        database.create("key3", data, 60);
+        database.create("key3", data, 60);
     }
 
     @Test(expected = KeyNotFoundException.class)
@@ -93,10 +94,10 @@ public class DatabaseTest {
     public void shouldRaiseKeyNotFoundExceptionOnceTheKeyIsDeleted() throws Exception {
         Database database = new Database();
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
-        String key = "key4";
-        database.create("key1", data);
-        database.create("key2", data);
-        database.create(key, data);
+        String key = "key3";
+        database.create("key1", data, 60);
+        database.create("key2", data, 60);
+        database.create(key, data, 60);
         database.delete(key);
         database.read(key);
         assertFalse(new File(key + ".text").exists());
@@ -117,8 +118,32 @@ public class DatabaseTest {
         Database database = new Database(path);
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
         String key = "key3";
-        database.create(key, data);
+        database.create(key, data, 60);
         database.delete(key);
         assertFalse(new File(path + key + ".text").exists());
+    }
+
+    @Test(expected = KeyNotFoundException.class)
+    public void shouldDeleteKeyAndFileIfTtlIsExpired() throws Exception {
+        Database database = new Database();
+        String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
+        String key = "key3";
+        database.create("key1", data, 5);
+        database.create(key, data, 5);
+        TimeUnit.SECONDS.sleep(5);
+        database.read(key);
+        assertFalse(new File(key + ".txt").exists());
+    }
+
+    @Test(expected = KeyNotFoundException.class)
+    public void ShouldRaiseKeyNotFoundExceptionWhenKeyOneShouldBeDeletedAfterExpiryAndThenNewEntryWillBeInserted()
+            throws Exception {
+        Database database = new Database();
+
+        database.create("key2", "{\"name\":\"Key1\",\"salary\":600000.0,\"age\":20}", 5);
+        database.create("key1", "{\"name\":\"Key2\",\"salary\":600000.0,\"age\":20}", 60);
+        TimeUnit.SECONDS.sleep(6);
+        assertEquals("{\"name\":\"Key2\",\"salary\":600000.0,\"age\":20}", database.read("key1"));
+        database.read("key2");
     }
 }

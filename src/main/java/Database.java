@@ -4,9 +4,7 @@ import exception.KeyNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Calendar;
 
 public class Database {
 
@@ -28,14 +26,17 @@ public class Database {
         databaseRegistry.createNewFile();
     }
 
-    public boolean create(String key, String json) throws Exception {
-        if (exists(key))
-            throw new KeyAlreadyExistsException();
+    public boolean create(String key, String json, int ttlInSeconds) throws Exception {
+        if (exist(key)) throw new KeyAlreadyExistsException();
 
+        String keyToBeWritten = new ObjectMapper().writeValueAsString(new Entry(key, ttlInSeconds));
         FileManager fileManager = new FileManager();
-        String resourceFileName = key + ".txt";
-        fileManager.write(databaseRegistry, key + ":" + resourceFileName, true);
-        File resourceFile = createResourceFile(resourceFileName);
+        String resourceFileName = concatFileNameWithExtension(key);
+        fileManager.write(databaseRegistry, keyToBeWritten, true);
+        File resourceFile;
+        if (path != null) resourceFile = new File(path + resourceFileName);
+        else resourceFile = new File(resourceFileName);
+        resourceFile.createNewFile();
 
         fileManager.write(resourceFile, "{\"" + key + "\" : " + json + "}", false);
         String read = fileManager.read(resourceFile);
@@ -43,7 +44,7 @@ public class Database {
     }
 
     public String read(String key) throws Exception {
-        if (!exists(key)) throw new KeyNotFoundException();
+        if (!exist(key)) throw new KeyNotFoundException();
         FileManager fileManager = new FileManager();
         String read;
         if (path == null) read = fileManager.read(new File(concatFileNameWithExtension(key)));
@@ -52,39 +53,45 @@ public class Database {
     }
 
     public void delete(String key) throws Exception {
-        if (!exists(key)) throw new KeyNotFoundException();
+        if (!exist(key)) throw new KeyNotFoundException();
+        deleteEntryAndResourceFile(key);
+    }
 
+    private void deleteEntryAndResourceFile(String key) throws IOException {
         FileManager fileManager = new FileManager();
         String read = fileManager.read(databaseRegistry);
 
         String[] entries = read.split("(?<=\n)");
-        Optional<String> reduce = Arrays.stream(entries).filter(s -> {
-            String[] split = s.split(":");
-            return !split[0].equals(key);
-        }).collect(Collectors.toList()).stream().reduce((s, s2) -> s + s2);
+        String updatedEntries = "";
+        for (String entry : entries) {
+            Entry currentEntry = new ObjectMapper().readValue(entry, Entry.class);
+            if (!currentEntry.getKey().equals(key)) {
+                updatedEntries += entry;
+            }
+        }
 
         if (path == null) new File(concatFileNameWithExtension(key)).delete();
         else new File(concatFileNameWithExtension(path + key)).delete();
-        if (reduce.isPresent()) fileManager.write(databaseRegistry, reduce.get(), false);
+        fileManager.write(databaseRegistry, updatedEntries, false);
     }
 
-    private File createResourceFile(String resourceFileName) throws IOException {
-        File resourceFile;
-        if (path != null) {
-            resourceFile = new File(path + resourceFileName);
-            resourceFile.createNewFile();
-            return resourceFile;
-        }
-        return new File(resourceFileName);
-    }
 
-    private boolean exists(String key) throws IOException {
+    private boolean exist(String key) throws Exception {
         FileManager fileManager = new FileManager();
         String read = fileManager.read(databaseRegistry);
-        String[] entries = read.split("\n");
-        for (String entry : entries) {
-            String[] split = entry.split(":");
-            if (split[0].equals(key)) return true;
+        if (!read.isEmpty()) {
+            String[] entries = read.split("\n");
+            for (String entry : entries) {
+                Entry currentEntry = new ObjectMapper().readValue(entry, Entry.class);
+                if (currentEntry.getKey().equals(key)) {
+                    if (((currentEntry.getCreatedAt().getTimeInMillis() + currentEntry.getTtl() * 1000L)
+                            >= (Calendar.getInstance().getTimeInMillis()))) return true;
+                    else {
+                        deleteEntryAndResourceFile(key);
+                        return false;
+                    }
+                }
+            }
         }
         return false;
     }
