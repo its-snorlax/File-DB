@@ -8,9 +8,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static exception.ExceptionMessage.KEY_ALREADY_EXIST_EXCEPTION;
-import static exception.ExceptionMessage.KEY_NOT_FOUND_EXCEPTION;
-
 public class Database {
 
     private final File databaseRegistry;
@@ -32,8 +29,8 @@ public class Database {
     }
 
     public boolean create(String key, String json) throws Exception {
-        if (searchFor(key))
-            throw new KeyAlreadyExistsException(KEY_ALREADY_EXIST_EXCEPTION);
+        if (exists(key))
+            throw new KeyAlreadyExistsException();
 
         FileManager fileManager = new FileManager();
         String resourceFileName = key + ".txt";
@@ -46,16 +43,16 @@ public class Database {
     }
 
     public String read(String key) throws Exception {
-        if (!searchFor(key)) throw new KeyNotFoundException(KEY_NOT_FOUND_EXCEPTION);
+        if (!exists(key)) throw new KeyNotFoundException();
         FileManager fileManager = new FileManager();
         String read;
-        if (path == null) read = fileManager.read(new File(key + ".txt"));
-        else read = fileManager.read(new File(path + key + ".txt"));
+        if (path == null) read = fileManager.read(new File(concatFileNameWithExtension(key)));
+        else read = fileManager.read(new File(concatFileNameWithExtension(path + key)));
         return new ObjectMapper().readTree(read).get(key).toString();
     }
 
     public void delete(String key) throws Exception {
-        if (!searchFor(key)) throw new KeyNotFoundException(KEY_NOT_FOUND_EXCEPTION);
+        if (!exists(key)) throw new KeyNotFoundException();
 
         FileManager fileManager = new FileManager();
         String read = fileManager.read(databaseRegistry);
@@ -66,8 +63,8 @@ public class Database {
             return !split[0].equals(key);
         }).collect(Collectors.toList()).stream().reduce((s, s2) -> s + s2);
 
-        if (path == null) new File(key + ".txt").delete();
-        else new File(path + key + ".txt").delete();
+        if (path == null) new File(concatFileNameWithExtension(key)).delete();
+        else new File(concatFileNameWithExtension(path + key)).delete();
         if (reduce.isPresent()) fileManager.write(databaseRegistry, reduce.get(), false);
     }
 
@@ -81,7 +78,7 @@ public class Database {
         return new File(resourceFileName);
     }
 
-    private boolean searchFor(String key) throws IOException {
+    private boolean exists(String key) throws IOException {
         FileManager fileManager = new FileManager();
         String read = fileManager.read(databaseRegistry);
         String[] entries = read.split("\n");
@@ -90,5 +87,9 @@ public class Database {
             if (split[0].equals(key)) return true;
         }
         return false;
+    }
+
+    private String concatFileNameWithExtension(String fileName) {
+        return fileName + ".txt";
     }
 }

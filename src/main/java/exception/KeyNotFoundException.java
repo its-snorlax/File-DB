@@ -1,7 +1,9 @@
 package exception;
 
 public class KeyNotFoundException extends Exception {
-    public KeyNotFoundException(String message) {
+    public static final String message = "Key does not exists in our database";
+
+    public KeyNotFoundException() {
         super(message);
     }
 }
