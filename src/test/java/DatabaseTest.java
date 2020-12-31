@@ -9,13 +9,27 @@ import static org.junit.Assert.*;
 
 public class DatabaseTest {
 
+    private final String homePath = System.getenv("HOME");
+
     @After
-    public void createFile() {
+    public void removeFiles() {
         File dbFile = new File("./Database.txt");
         File key1File = new File("./key1.txt");
         File key2File = new File("./key2.txt");
         File key3File = new File("./key3.txt");
 
+        if (dbFile.exists()) dbFile.delete();
+        if (key1File.exists()) key1File.delete();
+        if (key2File.exists()) key2File.delete();
+        if (key3File.exists()) key3File.delete();
+    }
+
+    @After
+    public void removeFilesInHomeDirectory() {
+        File dbFile = new File(homePath + "/File-DB/Database.txt");
+        File key1File = new File(homePath + "/File-DB/key1.txt");
+        File key2File = new File(homePath + "/File-DB/key2.txt");
+        File key3File = new File(homePath + "/File-DB/key3.txt");
         if (dbFile.exists()) dbFile.delete();
         if (key1File.exists()) key1File.delete();
         if (key2File.exists()) key2File.delete();
@@ -33,10 +47,11 @@ public class DatabaseTest {
 
     @Test
     public void shouldInsertJsonCorrespondingToKeyWhenFilePathIsGiven() throws Exception {
-        assertTrue(new Database("/home/prayas/File-DB")
+
+        assertTrue(new Database(homePath + "/File-DB")
                 .create("key1", "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}"));
 
-        assertTrue(new Database("/home/prayas/File-DB")
+        assertTrue(new Database(homePath + "/File-DB")
                 .create("key2", "{\"name\":\"Prateek\",\"salary\":600000.0,\"age\":20}"));
 
     }
@@ -52,7 +67,7 @@ public class DatabaseTest {
 
     @Test
     public void shouldReadTheExactDataWhichWeStoreInFileWhenFilePathIsGiven() throws Exception {
-        Database database = new Database("/home/prayas/File-DB");
+        Database database = new Database(homePath + "/File-DB");
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
         database.create("key3", data);
 
@@ -88,14 +103,22 @@ public class DatabaseTest {
     }
 
     @Test(expected = KeyNotFoundException.class)
-    public void shouldRaiseKeyNotFoundExceptionOnceTheKeyIsDeletedWhenDBPathIsGiven() throws Exception {
-        String path = "/home/prayas/File-DB";
+    public void shouldRaiseKeyNotFoundExceptionIfUserTriesToDeleteKeyWhichNeverInserted() throws Exception {
+        String path = homePath + "/File-DB";
+        Database database = new Database(path);
+        String key = "key3";
+        database.delete(key);
+        assertFalse(new File(path + key + ".text").exists());
+    }
+
+    @Test()
+    public void shouldDeleteKeyFileAfterDeletingTheKeyEntryFromDatabase() throws Exception {
+        String path = homePath + "/File-DB";
         Database database = new Database(path);
         String data = "{\"name\":\"Prayas\",\"salary\":600000.0,\"age\":20}";
-        String key = "key4";
+        String key = "key3";
         database.create(key, data);
         database.delete(key);
-        database.read(key);
         assertFalse(new File(path + key + ".text").exists());
     }
 }
