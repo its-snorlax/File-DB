@@ -26,7 +26,7 @@ public class Database {
         databaseRegistry.createNewFile();
     }
 
-    public boolean create(String key, String json, int ttlInSecond) throws Exception {
+    synchronized public boolean create(String key, String json, int ttlInSecond) throws Exception {
         if (exist(key)) throw new KeyAlreadyExistsException(key);
 
         String keyToBeWritten = new ObjectMapper().writeValueAsString(new Entry(key, ttlInSecond));
@@ -43,7 +43,7 @@ public class Database {
         return new ObjectMapper().readTree(read).get(key) != null;
     }
 
-    public String read(String key) throws Exception {
+    synchronized public String read(String key) throws Exception {
         if (!exist(key)) throw new KeyNotFoundException(key);
         FileManager fileManager = new FileManager();
         String read;
@@ -52,7 +52,7 @@ public class Database {
         return new ObjectMapper().readTree(read).get(key).toString();
     }
 
-    public void delete(String key) throws Exception {
+    synchronized public void delete(String key) throws Exception {
         if (!exist(key)) throw new KeyNotFoundException(key);
         deleteEntryAndResourceFile(key);
     }
