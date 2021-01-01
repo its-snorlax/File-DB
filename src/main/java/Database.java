@@ -26,10 +26,10 @@ public class Database {
         databaseRegistry.createNewFile();
     }
 
-    public boolean create(String key, String json, int ttlInSeconds) throws Exception {
+    public boolean create(String key, String json, int ttlInSecond) throws Exception {
         if (exist(key)) throw new KeyAlreadyExistsException();
 
-        String keyToBeWritten = new ObjectMapper().writeValueAsString(new Entry(key, ttlInSeconds));
+        String keyToBeWritten = new ObjectMapper().writeValueAsString(new Entry(key, ttlInSecond));
         FileManager fileManager = new FileManager();
         String resourceFileName = concatFileNameWithExtension(key);
         fileManager.write(databaseRegistry, keyToBeWritten, true);
@@ -61,12 +61,12 @@ public class Database {
         FileManager fileManager = new FileManager();
         String read = fileManager.read(databaseRegistry);
 
-        String[] entries = read.split("(?<=\n)");
+        String[] entries = read.split("\n");
         String updatedEntries = "";
         for (String entry : entries) {
             Entry currentEntry = new ObjectMapper().readValue(entry, Entry.class);
             if (!currentEntry.getKey().equals(key)) {
-                updatedEntries += entry;
+                updatedEntries += entry + "\n";
             }
         }
 
