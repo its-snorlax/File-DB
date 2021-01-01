@@ -27,7 +27,7 @@ public class Database {
     }
 
     public boolean create(String key, String json, int ttlInSecond) throws Exception {
-        if (exist(key)) throw new KeyAlreadyExistsException();
+        if (exist(key)) throw new KeyAlreadyExistsException(key);
 
         String keyToBeWritten = new ObjectMapper().writeValueAsString(new Entry(key, ttlInSecond));
         FileManager fileManager = new FileManager();
@@ -44,7 +44,7 @@ public class Database {
     }
 
     public String read(String key) throws Exception {
-        if (!exist(key)) throw new KeyNotFoundException();
+        if (!exist(key)) throw new KeyNotFoundException(key);
         FileManager fileManager = new FileManager();
         String read;
         if (path == null) read = fileManager.read(new File(concatFileNameWithExtension(key)));
@@ -53,7 +53,7 @@ public class Database {
     }
 
     public void delete(String key) throws Exception {
-        if (!exist(key)) throw new KeyNotFoundException();
+        if (!exist(key)) throw new KeyNotFoundException(key);
         deleteEntryAndResourceFile(key);
     }
 

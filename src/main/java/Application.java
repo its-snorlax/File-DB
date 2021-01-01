@@ -33,5 +33,10 @@ public class Application {
             e.printStackTrace();
         }
 
+        try {
+            database.read("Raj");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
