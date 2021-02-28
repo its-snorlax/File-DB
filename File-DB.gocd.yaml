@@ -1,7 +1,7 @@
 format_version: 10
 pipelines:
   File-DB:
-    group: defaultGroup
+    group: File-DB
     label_template: ${COUNT}
     lock_behavior: none
     display_order: -1
