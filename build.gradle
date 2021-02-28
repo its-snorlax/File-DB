@@ -9,7 +9,10 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
 }
-
+jar {
+    archiveBaseName = 'file-db'
+    archiveVersion =  '0.1.0'
+}
 dependencies {
     implementation 'junit:junit:4.12'
 
