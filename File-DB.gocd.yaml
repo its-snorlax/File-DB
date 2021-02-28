@@ -1,6 +1,6 @@
 format_version: 10
 pipelines:
-  File-DB:
+  FileDB:
     group: FileDB
     label_template: ${COUNT}
     lock_behavior: none
